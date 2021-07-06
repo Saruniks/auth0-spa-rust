@@ -1,19 +1,19 @@
-## About
+# About
 Work in progress. I am likely to add more imports or fix bugs if someone
 opens issue in github.
-  
+
 This crate provides auth0-spa-js wasm-bindgen imports for some functionality.
 Also, this crate includes opinionated yew implementation of auth0-spa-js.
 
-## Run tests
+# Run tests
 
-# Make sure chrome driver is running
+## Make sure chrome driver is running
 chromedriver --port=4444
 
-# Run testing app
+## Run testing app
 cd testing/app
 trunk serve --port=8000
 
-# Run selenium tests
+## Run selenium tests
 cd testing/selenium
 cargo run
