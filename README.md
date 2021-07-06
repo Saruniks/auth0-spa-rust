@@ -13,8 +13,10 @@ chromedriver --port=4444
 
 ## Run testing app
 cd testing/app
+
 trunk serve --port=8000
 
 ## Run selenium tests
 cd testing/selenium
+
 cargo run
