@@ -13,7 +13,7 @@ use crate::{
     Auth0Client, Auth0ClientOptions, LogoutOptions,
 };
 
-pub use self::model::{Claim, ConfigOptions, User, AuthLogoutOptions};
+pub use self::model::{Claim, ConfigOptions, User, AuthLogoutOptions, GetTokenSilentlyOptions};
 
 pub static AUTH0_DOMAIN: OnceCell<String> = OnceCell::new();
 pub static AUTH0_CLIENT_ID: OnceCell<String> = OnceCell::new();
