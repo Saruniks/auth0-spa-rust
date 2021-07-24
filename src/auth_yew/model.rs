@@ -19,6 +19,7 @@ pub struct ConfigOptions {
     pub redirect_uri: String,
     pub useRefreshTokens: bool,
     pub cacheLocation: String,
+    pub audience: String,
 }
 
 #[allow(non_snake_case)]

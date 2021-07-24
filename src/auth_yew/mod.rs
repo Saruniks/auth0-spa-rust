@@ -36,6 +36,7 @@ impl Auth0Service {
             redirect_uri: AUTH0_REDIRECT_URI.get().expect("AUTH0_REDIRECT_URI not set").to_string(),
             useRefreshTokens: *AUTH0_USE_REFRESH_TOKENS.get().expect("AUTH0_USE_REFRESH_TOKENS not set"),
             cacheLocation: AUTH0_CACHE_LOCATION.get().expect("AUTH0_CACHE_LOCATION not set").to_string(),
+            audience: "https://vendenic.com".to_string(),
         };
 
         Auth0Service(Auth0Client::new(
@@ -79,12 +80,12 @@ impl Auth0Service {
     pub fn get_token(callback: Callback<Option<String>>) {
         spawn_local(async move {
 
-            let options = TokenOptions {
-                audience: "https://vendenic.com".to_string(),
-            };
+            // let options = TokenOptions {
+            //     audience: "https://vendenic.com".to_string(),
+            // };
 
             let access_token = AUTH0_SERVICE.0.get_token_silently(
-                GetTokenSilentlyOptions::try_from(JsValue::from_serde(&options).unwrap()).ok()
+                None
             ).await;
 
             match JsValue::into_serde::<String>(&access_token) {
