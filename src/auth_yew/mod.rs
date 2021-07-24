@@ -78,12 +78,11 @@ impl Auth0Service {
 
     pub fn get_token(callback: Callback<Option<String>>) {
         spawn_local(async move {
-            // let access_token = AUTH0_SERVICE.0.get_id_token_claims(None).await;
             let access_token = AUTH0_SERVICE.0.get_token_silently(None).await;
 
-            match JsValue::into_serde::<Claim>(&access_token) {
+            match JsValue::into_serde::<String>(&access_token) {
                 Ok(token) => {
-                    callback.emit(Some(token.__raw));
+                    callback.emit(Some(token));
                 }
                 Err(_) => {
                     callback.emit(None);
