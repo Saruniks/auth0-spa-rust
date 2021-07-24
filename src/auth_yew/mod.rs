@@ -10,10 +10,10 @@ use lazy_static::lazy_static;
 use yew::Callback;
 
 use crate::{
-    Auth0Client, Auth0ClientOptions, LogoutOptions, GetTokenSilentlyOptions,
+    Auth0Client, Auth0ClientOptions, LogoutOptions,
 };
 
-pub use self::model::{Claim, ConfigOptions, User, AuthLogoutOptions, TokenOptions};
+pub use self::model::{Claim, ConfigOptions, User, AuthLogoutOptions};
 
 pub static AUTH0_DOMAIN: OnceCell<String> = OnceCell::new();
 pub static AUTH0_CLIENT_ID: OnceCell<String> = OnceCell::new();
@@ -78,14 +78,7 @@ impl Auth0Service {
 
     pub fn get_token(callback: Callback<Option<String>>) {
         spawn_local(async move {
-
-            let options = TokenOptions {
-                audience: "https://vendenic.com".to_string(),
-            };
-
-            let access_token = AUTH0_SERVICE.0.get_token_silently(
-                GetTokenSilentlyOptions::try_from(JsValue::from_serde(&options).unwrap()).ok()
-            ).await;
+            let access_token = AUTH0_SERVICE.0.get_token_silently(None).await;
 
             match JsValue::into_serde::<String>(&access_token) {
                 Ok(token) => {

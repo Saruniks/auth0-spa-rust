@@ -5,7 +5,7 @@ mod auth_yew;
 #[cfg(feature = "auth0-yew")]
 pub use auth_yew::Auth0Service;
 #[cfg(feature = "auth0-yew")]
-pub use auth_yew::{Claim, ConfigOptions, User, TokenOptions};
+pub use auth_yew::{Claim, ConfigOptions, User};
 #[cfg(feature = "auth0-yew")]
 pub use auth_yew::{AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_REDIRECT_URI, AUTH0_USE_REFRESH_TOKENS, AUTH0_CACHE_LOCATION};
 
