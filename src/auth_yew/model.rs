@@ -23,7 +23,7 @@ pub struct ConfigOptions {
 
 #[allow(non_snake_case)]
 #[derive(Serialize)]
-pub struct GetTokenSilentlyOptions {
+pub struct TokenOptions {
     pub audience: String,
 }
 
