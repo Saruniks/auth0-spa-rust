@@ -78,7 +78,12 @@ impl Auth0Service {
 
     pub fn get_token(callback: Callback<Option<String>>) {
         spawn_local(async move {
-            let access_token = AUTH0_SERVICE.0.get_token_silently(None).await;
+
+            let options = GetTokenSilentlyOptions {
+                audience: "https://vendenic.com".to_string(),
+            };
+
+            let access_token = AUTH0_SERVICE.0.get_token_silently(options).await;
 
             match JsValue::into_serde::<String>(&access_token) {
                 Ok(token) => {

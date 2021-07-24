@@ -23,6 +23,12 @@ pub struct ConfigOptions {
 
 #[allow(non_snake_case)]
 #[derive(Serialize)]
+pub struct GetTokenSilentlyOptions {
+    pub audience: String,
+}
+
+#[allow(non_snake_case)]
+#[derive(Serialize)]
 pub struct AuthLogoutOptions {
     pub returnTo: String,
 }
