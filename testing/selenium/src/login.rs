@@ -32,6 +32,7 @@ pub async fn login_with_popup(driver: &WebDriver) -> WebDriverResult<()> {
     let login_with_redirect_button = driver.find_element(By::Id("login-with-popup")).await?;
     login_with_redirect_button.click().await?;
 
+    sleep(Duration::from_millis(200)).await;
     let window_handles = driver.window_handles().await?;
     driver.switch_to().window(&window_handles[1]).await?;
 
@@ -45,10 +46,6 @@ pub async fn login_with_popup(driver: &WebDriver) -> WebDriverResult<()> {
     submit_button.click();
 
     driver.switch_to().window(&window_handles[0]).await?;
-
-    
-
-
 
     let refresh_button = driver.find_element(By::Id("refresh")).await?;
     refresh_button.click().await?;

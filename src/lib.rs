@@ -54,11 +54,11 @@ extern "C" {
         options: Option<GetIdTokenClaimsOptions>,
     ) -> JsValue;
 
-    #[wasm_bindgen(method, js_name = getTokenSilently)]
+    #[wasm_bindgen(method, catch, js_name = getTokenSilently)]
     pub async fn get_token_silently(
         this: &Auth0Client,
         options: Option<GetTokenSilentlyOptions>,
-    ) -> JsValue;
+    ) -> Result<JsValue, JsValue>;
 
     #[wasm_bindgen(extends = :: js_sys :: Object , js_name = GetTokenWithPopupOptions)]
     pub type GetTokenWithPopupOptions;

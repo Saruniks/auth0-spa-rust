@@ -24,10 +24,9 @@ pub enum Msg {
     LoginWithPopup,
     Logout,
     GetUser(Option<User>),
-    GetToken(Option<String>),
+    GetToken(Result<String, JsValue>),
     IsAuthenticated(bool),
     Refresh,
-    // todo: Change from JsValue to valid error?
     HandleRedirectCallback(Result<JsValue, JsValue>),
 }
 
@@ -83,8 +82,16 @@ impl Component for TestComponent {
             Msg::IsAuthenticated(is_authenticated) => {
                 self.is_authenticated = Some(is_authenticated);
             }
-            Msg::GetToken(token) => {
-                self.token = token;
+            Msg::GetToken(res) => {
+                match res {
+                    Ok(token) => {
+                        self.token = Some(token);
+                    }
+                    Err(err) => {
+                        ConsoleService::log(&format!("GetToken err = {:?}", err));
+                        self.token = None;
+                    }
+                }
             }
             Msg::Refresh => {
                 Auth0Service::is_authenticated(self.link.callback(Msg::IsAuthenticated));

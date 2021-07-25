@@ -20,6 +20,6 @@ async fn main() -> WebDriverResult<()> {
     login_with_popup(&driver).await;
 
     sleep(Duration::from_millis(200)).await;
-    driver.quit().await?;
+    // driver.quit().await?;
     Ok(())
 }
