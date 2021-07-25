@@ -9,7 +9,6 @@ use std::convert::TryFrom;
 
 use lazy_static::lazy_static;
 use yew::Callback;
-use yew::{services::IntervalService, services::{ConsoleService, Task}, worker::{Agent, AgentLink, Context, HandlerId}};
 
 use crate::{
     Auth0Client, Auth0ClientOptions, LogoutOptions, GetTokenSilentlyOptions,

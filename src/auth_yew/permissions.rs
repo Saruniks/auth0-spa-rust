@@ -1,15 +1,16 @@
-use std::{collections::HashSet, convert::TryFrom, sync::Mutex, time::Duration};
+use std::{collections::HashSet, sync::Mutex, time::Duration};
 use crate::{Auth0Service, User};
 use wasm_bindgen::prelude::*;
 
 use lazy_static::{__Deref, lazy_static};
 use wasm_bindgen::JsValue;
-use yew::{services::IntervalService, services::{ConsoleService, Task, TimeoutService, timeout::TimeoutTask}, worker::{Agent, AgentLink, Context, HandlerId}};
-use serde::{Deserialize, Serialize};
+use yew::{services::{ConsoleService, TimeoutService, timeout::TimeoutTask}, worker::{Agent, AgentLink, Context, HandlerId}};
+use serde::Deserialize;
 
 lazy_static! {
     static ref PERMISSIONS: Mutex<Vec<String>> = Mutex::new(Vec::new());
     static ref USER: Mutex<Option<User>> = Mutex::new(None);
+    static ref ACCESS_TOKEN: Mutex<Option<String>> = Mutex::new(None);
 }
 
 pub struct PermissionsService;
@@ -22,6 +23,10 @@ impl PermissionsService {
 
     pub fn get_user() -> Option<User> {
         USER.lock().unwrap().deref().clone()
+    }
+
+    pub fn get_access_token() -> Option<String> {
+        ACCESS_TOKEN.lock().unwrap().deref().clone()
     }
 }
 
@@ -75,9 +80,11 @@ impl Agent for PermissionsAgent {
             Msg::GetAccessToken(result) => {
                 match result {
                     Ok(token) => {
+                        *ACCESS_TOKEN.lock().unwrap() = Some(token.clone());
                         self.parse_permissions(token);
                     }
                     Err(err) => {
+                        *ACCESS_TOKEN.lock().unwrap() = None;
                         ConsoleService::log(&format!("GetAccessToken err: {:?}", err));
                         for id in &self.subscribers {
                             self.link.respond(*id, Output::Initialized);
@@ -101,7 +108,7 @@ impl Agent for PermissionsAgent {
         }
     }
 
-    fn handle_input(&mut self, msg: Self::Input, id: HandlerId) {
+    fn handle_input(&mut self, msg: Self::Input, _: HandlerId) {
         match msg {
             Input::Start => {
                 Auth0Service::get_user(self.link.callback(Msg::UserData));
