@@ -1,14 +1,15 @@
-use std::{collections::HashSet, convert::TryFrom, sync::Mutex};
-use crate::Auth0Service;
+use std::{collections::HashSet, convert::TryFrom, sync::Mutex, time::Duration};
+use crate::{Auth0Service, User};
 use wasm_bindgen::prelude::*;
 
-use lazy_static::lazy_static;
+use lazy_static::{__Deref, lazy_static};
 use wasm_bindgen::JsValue;
-use yew::{services::IntervalService, services::{ConsoleService, Task}, worker::{Agent, AgentLink, Context, HandlerId}};
+use yew::{services::IntervalService, services::{ConsoleService, Task, TimeoutService, timeout::TimeoutTask}, worker::{Agent, AgentLink, Context, HandlerId}};
 use serde::{Deserialize, Serialize};
 
 lazy_static! {
     static ref PERMISSIONS: Mutex<Vec<String>> = Mutex::new(Vec::new());
+    static ref USER: Mutex<Option<User>> = Mutex::new(None);
 }
 
 pub struct PermissionsService;
@@ -18,10 +19,17 @@ impl PermissionsService {
         let permissions = PERMISSIONS.lock().unwrap();
         permissions.contains(&permission)
     }
+
+    pub fn get_user() -> Option<User> {
+        USER.lock().unwrap().deref().clone()
+    }
 }
 
 pub enum Msg {
     GetAccessToken(Result<String, JsValue>),
+    UserData(Option<User>),
+    CheckSession,
+    CheckSessionResponse(bool),
 }
 
 pub enum Input {
@@ -33,6 +41,8 @@ pub enum Output {
 }
 
 pub struct PermissionsAgent {
+    #[allow(dead_code)]
+    timer_job: Option<TimeoutTask>,
     subscribers: HashSet<HandlerId>,
     link: AgentLink<Self>,
 }
@@ -47,7 +57,14 @@ impl Agent for PermissionsAgent {
     type Output = Output;
 
     fn create(link: AgentLink<Self>) -> Self {
+        // Idea: maybe instead of timer, check session only on actions
+        let timer_job = Some(TimeoutService::spawn(
+            Duration::from_millis(500),
+            link.callback(|_| Msg::CheckSession),
+        ));
+        
         Self {
+            timer_job,
             subscribers: HashSet::new(),
             link,
         }
@@ -68,12 +85,26 @@ impl Agent for PermissionsAgent {
                     }
                 }
             }
+            Msg::UserData(user) => {
+                *USER.lock().unwrap() = user;
+            }
+            Msg::CheckSession => {
+                Auth0Service::is_authenticated(self.link.callback(Msg::CheckSessionResponse));
+            }
+            Msg::CheckSessionResponse(is_authenticated) => {
+                // Idea: maybe instead of timer, check session only on actions
+                self.timer_job = Some(TimeoutService::spawn(
+                    Duration::from_millis(5000),
+                    self.link.callback(|_| Msg::CheckSession),
+                ));
+            }
         }
     }
 
     fn handle_input(&mut self, msg: Self::Input, id: HandlerId) {
         match msg {
             Input::Start => {
+                Auth0Service::get_user(self.link.callback(Msg::UserData));
                 self.fetch_permissions();
             }
         }
