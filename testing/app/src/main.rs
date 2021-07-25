@@ -1,8 +1,8 @@
 mod route;
 
-use yew::{html, services::console::ConsoleService, Component, ComponentLink, Html, Properties, ShouldRender};
+use yew::{Bridge, Bridged, Component, ComponentLink, Html, Properties, ShouldRender, html, services::console::ConsoleService};
 use yewtil::NeqAssign;
-use auth0_spa_rust::{Auth0Service, User};
+use auth0_spa_rust::{Auth0Service, User, permissions::{Input, Output, PermissionsAgent}};
 use wasm_bindgen::prelude::*;
 use yew::services::timeout::TimeoutTask;
 use yew::services::TimeoutService;
@@ -17,6 +17,7 @@ pub struct TestComponent {
     props: Props,
     #[allow(dead_code)]
     timer_job: Option<TimeoutTask>,
+    permissions_agent: Box<dyn Bridge<PermissionsAgent>>,
 }
 
 pub enum Msg {
@@ -28,6 +29,7 @@ pub enum Msg {
     IsAuthenticated(bool),
     Refresh,
     HandleRedirectCallback(Result<JsValue, JsValue>),
+    PermissionsInitialized,
 }
 
 #[derive(Properties, Clone, PartialEq, Default)]
@@ -37,6 +39,13 @@ impl Component for TestComponent {
     type Message = Msg;
     type Properties = Props;
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+
+        let mut permissions_agent = PermissionsAgent::bridge(link.callback(|msg| match msg {
+            Output::Initialized => Msg::PermissionsInitialized,
+        }));
+
+        permissions_agent.send(Input::Start);
+
         match yew::web_sys::window() {
             Some(window) => match window.location().search() {
                 Ok(path) => {
@@ -63,7 +72,7 @@ impl Component for TestComponent {
             link.callback(|_| Msg::Refresh),
         ));
 
-        Self { link, props, user: None, token: None, is_authenticated: None, timer_job }
+        Self { link, props, user: None, token: None, is_authenticated: None, timer_job, permissions_agent }
     }
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
@@ -96,7 +105,7 @@ impl Component for TestComponent {
             Msg::Refresh => {
                 Auth0Service::is_authenticated(self.link.callback(Msg::IsAuthenticated));
                 Auth0Service::get_user(self.link.callback(Msg::GetUser));
-                Auth0Service::get_token(self.link.callback(Msg::GetToken));
+                Auth0Service::get_access_token(self.link.callback(Msg::GetToken));
 
                 self.timer_job = Some(TimeoutService::spawn(
                     Duration::from_millis(100),
@@ -108,6 +117,9 @@ impl Component for TestComponent {
             }
             Msg::HandleRedirectCallback(Err(err)) => {
                 ConsoleService::error(&format!("{:?}", err));
+            }
+            Msg::PermissionsInitialized => {
+                ConsoleService::error("Permissions initialized");
             }
         }
 

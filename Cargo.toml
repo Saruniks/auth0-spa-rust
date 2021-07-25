@@ -16,4 +16,5 @@ yew = { version = "0.18", features = ["web_sys"], optional = true }
 lazy_static = { version = "1.4.0", optional = true }
 
 [features]
+default = [ "auth0-yew" ]
 auth0-yew = ["log", "futures", "serde", "yew", "lazy_static"]

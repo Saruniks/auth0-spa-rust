@@ -1,4 +1,5 @@
 mod model;
+pub mod permissions;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
@@ -8,6 +9,7 @@ use std::convert::TryFrom;
 
 use lazy_static::lazy_static;
 use yew::Callback;
+use yew::{services::IntervalService, services::{ConsoleService, Task}, worker::{Agent, AgentLink, Context, HandlerId}};
 
 use crate::{
     Auth0Client, Auth0ClientOptions, LogoutOptions, GetTokenSilentlyOptions,
@@ -29,7 +31,6 @@ pub struct Auth0Service(Auth0Client);
 
 impl Auth0Service {
     fn new() -> Self {
-
         let options = ConfigOptions {
             domain: AUTH0_DOMAIN.get().expect("AUTH0_DOMAIN not set").to_string(),
             client_id: AUTH0_CLIENT_ID.get().expect("AUTH0_CLIENT_ID not set").to_string(),
@@ -77,7 +78,7 @@ impl Auth0Service {
         });
     }
 
-    pub fn get_token(callback: Callback<Result<String, JsValue>>) {
+    pub fn get_access_token(callback: Callback<Result<String, JsValue>>) {
         spawn_local(async move {
 
             let options = TokenOptions {
