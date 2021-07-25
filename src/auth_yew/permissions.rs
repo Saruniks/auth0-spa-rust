@@ -11,9 +11,9 @@ lazy_static! {
     static ref PERMISSIONS: Mutex<Vec<String>> = Mutex::new(Vec::new());
 }
 
-struct PermissionService;
+pub struct PermissionsService;
 
-impl PermissionService {
+impl PermissionsService {
     pub fn has_permission(permission: String) -> bool {
         let permissions = PERMISSIONS.lock().unwrap();
         permissions.contains(&permission)
