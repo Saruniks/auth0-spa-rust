@@ -62,6 +62,9 @@ impl Agent for PermissionsAgent {
                     }
                     Err(err) => {
                         ConsoleService::log(&format!("GetAccessToken err: {:?}", err));
+                        for id in &self.subscribers {
+                            self.link.respond(*id, Output::Initialized);
+                        }
                     }
                 }
             }
