@@ -18,8 +18,8 @@ serde = { version = "1.0", features = ["derive"] }
 yew = { version = "0.19.3" }
 lazy_static = { version = "1.4.0" }
 auth0-spa-rust = { path = "../../", features = ["auth0-yew"] }
-wasm-bindgen = { version="0.2.74", features = ["serde-serialize"] }
-wasm-bindgen-futures = "0.4.24"
+wasm-bindgen = { version="=0.2.74", features = ["serde-serialize"] }
+wasm-bindgen-futures = "=0.4.24"
 js-sys = "0.3.51"
 yewtil = { version = "0.3.2", features = ["stable"] }
 yew-router = { version="0.15.0", features = ["web_sys"] }
