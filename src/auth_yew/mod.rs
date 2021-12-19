@@ -77,32 +77,28 @@ impl Auth0Service {
         });
     }
 
-    pub fn get_access_token(callback: Callback<Result<String, JsValue>>) {
-        spawn_local(async move {
+    pub async fn get_access_token() -> Result<String, JsValue> {
+        let options = TokenOptions {
+            audience: "https://vendenic.com".to_string(),
+        };
 
-            let options = TokenOptions {
-                audience: "https://vendenic.com".to_string(),
-            };
+        let access_token = match AUTH0_SERVICE.0.get_token_silently(
+            Some(GetTokenSilentlyOptions::try_from(JsValue::from_serde(&options).unwrap()).unwrap())
+        ).await {
+            Ok(token) => token,
+            Err(err) => {
+                return Err(err);
+            },
+        };
 
-            let access_token = match AUTH0_SERVICE.0.get_token_silently(
-                Some(GetTokenSilentlyOptions::try_from(JsValue::from_serde(&options).unwrap()).unwrap())
-            ).await {
-                Ok(token) => token,
-                Err(err) => {
-                    callback.emit(Err(err));
-                    return;
-                },
-            };
-
-            match JsValue::into_serde::<String>(&access_token) {
-                Ok(token) => {
-                    callback.emit(Ok(token));
-                }
-                Err(err) => {
-                    callback.emit(Err(JsValue::from_str("get token err: failed to parse JsValue")));
-                }
+        match JsValue::into_serde::<String>(&access_token) {
+            Ok(token) => {
+               return Ok(token);
             }
-        });
+            Err(err) => {
+               return Err(JsValue::from_str("get token err: failed to parse JsValue"));
+            }
+        }
     }
 
     pub fn is_authenticated(callback: Callback<bool>) {
