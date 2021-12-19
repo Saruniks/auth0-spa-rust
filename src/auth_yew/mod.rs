@@ -29,7 +29,7 @@ lazy_static! {
 pub struct Auth0Service(Auth0Client);
 
 impl Auth0Service {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let options = ConfigOptions {
             domain: AUTH0_DOMAIN.get().expect("AUTH0_DOMAIN not set").to_string(),
             client_id: AUTH0_CLIENT_ID.get().expect("AUTH0_CLIENT_ID not set").to_string(),
