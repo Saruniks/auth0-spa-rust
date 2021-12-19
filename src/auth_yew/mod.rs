@@ -26,7 +26,7 @@ lazy_static! {
     pub static ref AUTH0_SERVICE: Auth0Service = Auth0Service::new();
 }
 
-pub struct Auth0Service(Auth0Client);
+pub struct Auth0Service(pub Auth0Client);
 
 impl Auth0Service {
     pub fn new() -> Self {

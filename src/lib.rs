@@ -7,7 +7,7 @@ pub use auth_yew::permissions;
 // #[cfg(feature = "auth0-yew")]
 // pub use auth_yew::permissions::PermissionsService;
 #[cfg(feature = "auth0-yew")]
-pub use auth_yew::Auth0Service;
+pub use auth_yew::{Auth0Service, AUTH0_SERVICE};
 #[cfg(feature = "auth0-yew")]
 pub use auth_yew::{Claim, ConfigOptions, User};
 #[cfg(feature = "auth0-yew")]
