@@ -15,7 +15,7 @@ once_cell = "1.7.2"
 log = { version = "0.4" }
 futures = { version = "0.3.15" }
 serde = { version = "1.0", features = ["derive"] }
-yew = { version = "0.18", features = ["web_sys"] }
+yew = { version = "0.19.3" }
 lazy_static = { version = "1.4.0" }
 auth0-spa-rust = { path = "../../", features = ["auth0-yew"] }
 wasm-bindgen = { version="0.2.74", features = ["serde-serialize"] }

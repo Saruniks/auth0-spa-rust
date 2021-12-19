@@ -11,7 +11,7 @@ tokio = { version = "1.8.0", features = ["time"] }
 log = { version = "0.4" }
 futures = { version = "0.3.15" }
 serde = { version = "1.0", features = ["derive"] }
-yew = { version = "0.18", features = ["web_sys"] }
+yew = { version = "0.18" }
 lazy_static = { version = "1.4.0" }
 auth0-spa-rust = { path = "../../", features = ["auth0-yew"] }
 wasm-bindgen = { version="0.2.74", features = ["serde-serialize"] }
