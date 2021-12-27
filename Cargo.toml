@@ -14,7 +14,10 @@ futures = { version = "0.3.15", optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
 yew = { version = "0.19.3", optional = true }
 lazy_static = { version = "1.4.0", optional = true }
+gloo-timers = { version = "0.2.2", optional = true }
+yew-agent = { version = "0.1.0", optional = true }
+
 
 [features]
 default = [ "auth0-yew" ]
-auth0-yew = ["log", "futures", "serde", "yew", "lazy_static"]
+auth0-yew = ["log", "futures", "serde", "yew", "lazy_static", "gloo-timers", "yew-agent"]

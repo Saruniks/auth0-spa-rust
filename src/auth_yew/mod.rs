@@ -95,7 +95,7 @@ impl Auth0Service {
             Ok(token) => {
                return Ok(token);
             }
-            Err(err) => {
+            Err(_err) => {
                return Err(JsValue::from_str("get token err: failed to parse JsValue"));
             }
         }
