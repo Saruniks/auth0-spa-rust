@@ -50,6 +50,7 @@ pub enum Output {
 pub struct PermissionsAgent {
     subscribers: HashSet<HandlerId>,
     link: AgentLink<Self>,
+    timeout: Timeout,
 }
 
 impl Agent for PermissionsAgent {
@@ -65,13 +66,14 @@ impl Agent for PermissionsAgent {
 
         let link_cloned = link.clone();
         // Idea: maybe instead of timer, check session only on actions
-        let _timeout = Timeout::new(500, move || {
+        let timeout = Timeout::new(500, move || {
             link_cloned.callback(|()| Msg::CheckSession);
         });
         
         Self {
             subscribers: HashSet::new(),
-            link
+            link,
+            timeout
         }
     }
 
@@ -100,7 +102,7 @@ impl Agent for PermissionsAgent {
             Msg::CheckSessionResponse(_is_authenticated) => {
                 // Idea: maybe instead of timer, check session only on actions
                 let link = self.link.clone();
-                let _timeout = Timeout::new(5000, move || {
+                self.timeout = Timeout::new(5000, move || {
                     link.callback(|()| Msg::CheckSession);
                 });
             }
