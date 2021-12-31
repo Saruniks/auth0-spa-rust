@@ -153,5 +153,6 @@ fn main() {
     AUTH0_USE_REFRESH_TOKENS.set(false).expect("Couldn't set AUTH0_USE_REFRESH_TOKENS");
     AUTH0_CACHE_LOCATION.set("localstorage".to_string()).expect("Couldn't set AUTH0_CACHE_LOCATION");
     
+    wasm_logger::init(wasm_logger::Config::default());
     yew::start_app::<TestComponent>();
 }

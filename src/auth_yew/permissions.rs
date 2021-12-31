@@ -5,7 +5,7 @@ use wasm_bindgen::prelude::*;
 use lazy_static::{__Deref, lazy_static};
 use wasm_bindgen::JsValue;
 use serde::Deserialize;
-use gloo_timers::callback::Timeout;
+use gloo_timers::callback::{Timeout, Interval};
 use wasm_bindgen_futures::spawn_local;
 use yew_agent::*;
 
@@ -64,12 +64,17 @@ impl Agent for PermissionsAgent {
 
     fn create(link: AgentLink<Self>) -> Self {
 
-        let link_cloned = link.clone();
+        let callback = link.callback(|()| Msg::CheckSession);
         // Idea: maybe instead of timer, check session only on actions
         let timeout = Timeout::new(500, move || {
-            link_cloned.callback(|()| Msg::CheckSession);
+            callback.emit(())
         });
-        
+
+        // let update_interval = Interval::new(500, move || link_cloned.callback(|()| Msg::CheckSession));
+
+        log::warn!("BrGr");
+        // web_sys::console::log("Rbwadw");
+
         Self {
             subscribers: HashSet::new(),
             link,
@@ -97,13 +102,14 @@ impl Agent for PermissionsAgent {
                 *USER.lock().unwrap() = user;
             }
             Msg::CheckSession => {
+                log::warn!("Brrr");
                 Auth0Service::is_authenticated(self.link.callback(Msg::CheckSessionResponse));
             }
             Msg::CheckSessionResponse(_is_authenticated) => {
                 // Idea: maybe instead of timer, check session only on actions
-                let link = self.link.clone();
+                let callback = self.link.callback(|()| Msg::CheckSession);
                 self.timeout = Timeout::new(500, move || {
-                    link.callback(|()| Msg::CheckSession);
+                    callback.emit(())
                 });
             }
         }
