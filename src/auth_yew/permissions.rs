@@ -141,10 +141,10 @@ struct Permissions {
 
 impl PermissionsAgent {
     fn fetch_permissions(&self) {
-        let link = self.link.clone();
+        let callback = self.link.callback(move |result: Result<String, JsValue>| Msg::GetAccessToken(result.clone()));
         spawn_local(async move {
             let result = Auth0Service::get_access_token().await;
-            link.callback(move |()| Msg::GetAccessToken(result.clone()));
+            callback.emit(result);
         });
     }
 
