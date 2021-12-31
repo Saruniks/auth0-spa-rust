@@ -70,11 +70,6 @@ impl Agent for PermissionsAgent {
             callback.emit(())
         });
 
-        // let update_interval = Interval::new(500, move || link_cloned.callback(|()| Msg::CheckSession));
-
-        log::warn!("BrGr");
-        // web_sys::console::log("Rbwadw");
-
         Self {
             subscribers: HashSet::new(),
             link,
@@ -102,13 +97,12 @@ impl Agent for PermissionsAgent {
                 *USER.lock().unwrap() = user;
             }
             Msg::CheckSession => {
-                log::warn!("Brrr");
                 Auth0Service::is_authenticated(self.link.callback(Msg::CheckSessionResponse));
             }
             Msg::CheckSessionResponse(_is_authenticated) => {
                 // Idea: maybe instead of timer, check session only on actions
                 let callback = self.link.callback(|()| Msg::CheckSession);
-                self.timeout = Timeout::new(500, move || {
+                self.timeout = Timeout::new(5000, move || {
                     callback.emit(())
                 });
             }
