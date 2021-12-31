@@ -2,7 +2,7 @@ pub mod timeout;
 
 use auth0_spa_rust::Auth0Service;
 use futures::executor::block_on;
-use yew::{html, web_sys::window, Component, ComponentLink, Html, Properties, ShouldRender};
+use yew::prelude::*;
 use yewtil::NeqAssign;
 
 use std::{sync::Once, time::Duration};

@@ -23,3 +23,8 @@ wasm-bindgen-futures = "=0.4.24"
 js-sys = "0.3.51"
 yewtil = { version = "0.3.2", features = ["stable"] }
 yew-router = { version="0.15.0", features = ["web_sys"] }
+gloo-timers = "0.2.2"
+web-sys = { version = "0.3.50", features = [
+    "console"
+] }
+yew-agent = "0.1.0"

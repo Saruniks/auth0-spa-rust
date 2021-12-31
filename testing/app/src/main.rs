@@ -1,22 +1,20 @@
 mod route;
 
-use yew::{Bridge, Bridged, Component, ComponentLink, Html, Properties, ShouldRender, html, services::console::ConsoleService};
-use yewtil::NeqAssign;
+use yew::{Component, Html, Properties, html};
 use auth0_spa_rust::{Auth0Service, User, permissions::{Input, Output, PermissionsAgent}};
 use wasm_bindgen::prelude::*;
-use yew::services::timeout::TimeoutTask;
-use yew::services::TimeoutService;
-use std::time::Duration;
 use auth0_spa_rust::{AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_REDIRECT_URI, AUTH0_USE_REFRESH_TOKENS, AUTH0_CACHE_LOCATION};
+use gloo_timers::callback::Timeout;
+use yew_agent::{Bridge, Bridged};
+use yew::prelude::*;
+use wasm_bindgen_futures::spawn_local;
 
 pub struct TestComponent {
-    link: ComponentLink<Self>,
     user: Option<User>,
     token: Option<String>,
     is_authenticated: Option<bool>,
-    props: Props,
     #[allow(dead_code)]
-    timer_job: Option<TimeoutTask>,
+    timer_job: Option<Timeout>,
     permissions_agent: Box<dyn Bridge<PermissionsAgent>>,
 }
 
@@ -38,43 +36,40 @@ pub struct Props {}
 impl Component for TestComponent {
     type Message = Msg;
     type Properties = Props;
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
 
-        let mut permissions_agent = PermissionsAgent::bridge(link.callback(|msg| match msg {
+        let mut permissions_agent = PermissionsAgent::bridge(ctx.link().callback(|msg| match msg {
             Output::Initialized => Msg::PermissionsInitialized,
         }));
 
         permissions_agent.send(Input::Start);
 
-        match yew::web_sys::window() {
+        match web_sys::window() {
             Some(window) => match window.location().search() {
                 Ok(path) => {
                     if path.contains("code=") {
-                        ConsoleService::log("path.contains(code)");
                         Auth0Service::handle_redirect_callback(
-                            link.callback(Msg::HandleRedirectCallback),
+                            ctx.link().callback(Msg::HandleRedirectCallback),
                         );
                     }
                 }
                 Err(err) => {
-                    ConsoleService::log(&format!("window.location().search() error = {:?}", err));
                 }
             },
             None => {
-                ConsoleService::log(&format!("yew::web_sys::window() is None"));
             }
         }
 
-        Auth0Service::get_user(link.callback(Msg::GetUser));
+        Auth0Service::get_user(ctx.link().callback(Msg::GetUser));
 
-        let timer_job = Some(TimeoutService::spawn(
-            Duration::from_millis(100),
-            link.callback(|_| Msg::Refresh),
-        ));
+        let link_cloned = ctx.link().clone();
+        let timer_job = Some(Timeout::new(100, move || {
+            link_cloned.callback(|()| Msg::Refresh);
+        }));
 
-        Self { link, props, user: None, token: None, is_authenticated: None, timer_job, permissions_agent }
+        Self { user: None, token: None, is_authenticated: None, timer_job, permissions_agent }
     }
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::LoginWithRedirect => {
                 Auth0Service::login_with_redirect();
@@ -97,51 +92,49 @@ impl Component for TestComponent {
                         self.token = Some(token);
                     }
                     Err(err) => {
-                        ConsoleService::log(&format!("GetToken err = {:?}", err));
                         self.token = None;
                     }
                 }
             }
             Msg::Refresh => {
-                Auth0Service::is_authenticated(self.link.callback(Msg::IsAuthenticated));
-                Auth0Service::get_user(self.link.callback(Msg::GetUser));
-                Auth0Service::get_access_token(self.link.callback(Msg::GetToken));
+                Auth0Service::is_authenticated(ctx.link().callback(Msg::IsAuthenticated));
+                Auth0Service::get_user(ctx.link().callback(Msg::GetUser));
 
-                self.timer_job = Some(TimeoutService::spawn(
-                    Duration::from_millis(100),
-                    self.link.callback(|_| Msg::Refresh),
-                ));
+                let link = ctx.link().clone();
+                spawn_local(async move {
+                    let result = Auth0Service::get_access_token().await;
+                    link.callback(move |()| Msg::Refresh);
+                });
+
+                let link = ctx.link().clone();
+                self.timer_job = Some(Timeout::new(100, move || {
+                    link.callback(|()| Msg::Refresh);
+                }));        
             }
             Msg::HandleRedirectCallback(Ok(_)) => {
-                ConsoleService::log("HandleRedirectCallback success");
             }
             Msg::HandleRedirectCallback(Err(err)) => {
-                ConsoleService::error(&format!("{:?}", err));
             }
             Msg::PermissionsInitialized => {
-                ConsoleService::error("Permissions initialized");
             }
         }
 
         true
     }
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <div>
                 <div>
-                    <button id="login-with-redirect" onclick=self.link.callback(|_| Msg::LoginWithRedirect)>{ "Login with redirect" }</button>
+                    <button id="login-with-redirect" onclick={ctx.link().callback(|_| Msg::LoginWithRedirect)}>{ "Login with redirect" }</button>
                 </div>
                 <div>
-                    <button id="login-with-popup" onclick=self.link.callback(|_| Msg::LoginWithPopup)>{ "Login with popup" }</button>
+                    <button id="login-with-popup" onclick={ctx.link().callback(|_| Msg::LoginWithPopup)}>{ "Login with popup" }</button>
                 </div>
                 <div>
-                    <button id="logout" onclick=self.link.callback(|_| Msg::Logout)>{ "Logout" }</button>
+                    <button id="logout" onclick={ctx.link().callback(|_| Msg::Logout)}>{ "Logout" }</button>
                 </div>
                 <div>
-                    <button id="refresh" onclick=self.link.callback(|_| Msg::Refresh)>{ "Refresh" }</button>
+                    <button id="refresh" onclick={ctx.link().callback(|_| Msg::Refresh)}>{ "Refresh" }</button>
                 </div>
                 <div>
                     <p>{"IsAuthenticated:"} {format!("{:?}", self.is_authenticated)}</p>
@@ -151,10 +144,6 @@ impl Component for TestComponent {
             </div>
         }
     }
-
-    fn rendered(&mut self, _first_render: bool) {}
-
-    fn destroy(&mut self) {}
 }
 
 fn main() {

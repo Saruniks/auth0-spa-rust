@@ -1,12 +1,11 @@
 use auth0_spa_rust::Auth0Service;
 use futures::executor::block_on;
-use yew::{html, web_sys::window, Component, ComponentLink, Html, Properties, ShouldRender};
 use yewtil::NeqAssign;
+use yew::prelude::*;
 
 use std::{sync::Once, time::Duration};
 
 pub struct TestComponent {
-    props: Props,
 }
 
 pub enum Msg {}
@@ -17,22 +16,15 @@ pub struct Props {}
 impl Component for TestComponent {
     type Message = Msg;
     type Properties = Props;
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(_ctx: &Context<Self>) -> Self {
         Auth0Service::login_with_popup();
 
-        Self { props }
+        Self { }
     }
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         true
     }
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props.neq_assign(props)
-    }
-    fn view(&self) -> Html {
+    fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {}
     }
-
-    fn rendered(&mut self, _first_render: bool) {}
-
-    fn destroy(&mut self) {}
 }

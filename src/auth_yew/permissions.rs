@@ -102,7 +102,7 @@ impl Agent for PermissionsAgent {
             Msg::CheckSessionResponse(_is_authenticated) => {
                 // Idea: maybe instead of timer, check session only on actions
                 let link = self.link.clone();
-                self.timeout = Timeout::new(5000, move || {
+                self.timeout = Timeout::new(500, move || {
                     link.callback(|()| Msg::CheckSession);
                 });
             }
